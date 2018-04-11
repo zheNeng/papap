@@ -1,2 +1,5 @@
-# papap
-初次尝试node爬虫
+# p
+node爬虫
+ npm i cheerio
+ npm i axios
+ node papap
