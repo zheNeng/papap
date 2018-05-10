@@ -2,18 +2,18 @@
 const cheerio = require('cheerio')
 const fs = require("fs");
 const path = require('path');
-var baseUrl = 'https://www.3344mf.com'  //爬取的网站
+var baseUrl = 'https://www.3344mf.com' //爬取的网站
 var sum = 0
-var htmlNo =2 //爬虫得到起始页面，一个页面有20个图片库，每个图片库有20+的图片
-var htmlLimt = htmlNo + 10  //爬虫的结束页面
-let type = 'yazhou'   //图片分类   //katong yazhou zipai  taotu siwa  oumei
+var htmlNo = 11 //爬虫得到起始页面，一个页面有20个图片库，每个图片库有20+的图片
+var htmlLimt = htmlNo + 10 //爬虫的结束页面
+let type = 'yazhou' //图片分类   //katong yazhou zipai  taotu siwa  oumei
 var time = ''
 try {
-  fs.mkdirSync(`./dist`)  //创建文件夹
-} catch (e) { }
+  fs.mkdirSync(`./dist`) //创建文件夹
+} catch (e) {}
 try {
-  fs.mkdirSync(`./dist/${type}`)//创建文件夹
-} catch (e) { }
+  fs.mkdirSync(`./dist/${type}`) //创建文件夹
+} catch (e) {}
 let newdir = path.join(__dirname, `dist`)
 let picdir = newdir + `/${type}`
 
@@ -28,15 +28,15 @@ var f = function (e) { //封装函数
   let result = []
   return new Promise((res, rej) => {
     setTimeout(() => {
-      if(n<e.length){
-        console.log('相应时间过长，终止', e.length*500/1000)
-        if((n/e.length)>0.5){
+      if (n < e.length) {
+        console.log('相应时间过长，终止', e.length * 500 / 1000, `-${n/e.length}`)
+        if ((n / e.length) > 0.5) {
           res(result)
-        }else{
+        } else {
           res([])
         }
       }
-    }, e.length*500);
+    }, e.length * 500);
     e.forEach((a, i) => {
       a.then((t) => {
         n++
@@ -46,24 +46,24 @@ var f = function (e) { //封装函数
         }
       }).catch(a => {
         n++
-        console.log(`第${n}张图片请求失败`)
+        console.log(`第${n}/${e.length}张图片请求失败`)
         // result[i] = a
-        // if (n == e.length) {
-        //   res(result)
-        // }
+        if (n == e.length) {
+          res(result)
+        }
       })
     })
-    
+
   })
 
 }
 
 function getImgArr(imgArr) {
-  console.log('请求全部图片资源')
+  console.log('请求全部图片资源', imgArr.length)
   time = new Date()
   let arr = []
   for (let i = 0; i < imgArr.length; i++) {
-   config.url = imgArr[i]
+    config.url = imgArr[i]
     arr.push(axios(config))
     // config.url = imgArr[i]
     // axios(config).then(e => {
@@ -76,32 +76,40 @@ async function searchImg(htmlArr) {
   for (let i = 0; i < htmlArr.length; i++) {
     try {
       let e = await axios.get(htmlArr[i])
+      console.log('Docc-',htmlArr[i])
       let docC = cheerio.load(e.data)
       let imgArr = []
       docC(".news img").each((iImg, img) => {
         imgArr.push(docC(img).attr('src'))
       })
+      imgArr=imgArr.slice(0,120)
       console.log(`${htmlNo}页${i}条:${htmlArr[i]}`, )
-      let imgStream
-      imgStream = await getImgArr(imgArr)
-      console.log('请求图片耗时间', (new Date() - time) / 1000 + '秒')
-      time = new Date()
-      imgStream.forEach((e, ii) => {
-        if (e.data.length < 500000) {
-          let ws = fs.createWriteStream(`${picdir}/${htmlNo}_${i}-${ii}.jpg`, {
-            defaultEncoding: 'utf8',
-            fd: null,
-            mode: 0o666,
-            autoClose: true
-          })
-          let write = ws.write(e.data)
-          let end = ws.end()
-        } else {
-          console.log('图片过大')
-        }
-      })
-      console.log('写入所有消耗时间', (new Date() - time) / 1000 + '秒',`${i}/${htmlArr.length-1}`)
-    } catch (e) { console.log('子页面读取失败') }
+      if (imgArr.length > 0) {
+        let imgStream
+        imgStream = await getImgArr(imgArr)
+        console.log('请求图片耗时间', (new Date() - time) / 1000 + '秒')
+        time = new Date()
+        imgStream.forEach((e, ii) => {
+          if (e.data.length < 500000) {
+            let ws = fs.createWriteStream(`${picdir}/${htmlNo}_${i}-${ii}.jpg`, {
+              defaultEncoding: 'utf8',
+              fd: null,
+              mode: 0o666,
+              autoClose: true
+            })
+            let write = ws.write(e.data)
+            let end = ws.end()
+          } else {
+            console.log('图片过大')
+          }
+        })
+        console.log('写入所有消耗时间', (new Date() - time) / 1000 + '秒', `${i}/${htmlArr.length-1}`)
+      } else {
+        console.log('长度为0')
+      }
+    } catch (e) {
+      console.log('子页面读取失败')
+    }
   }
 
   if (htmlNo == htmlLimt) {
@@ -113,6 +121,7 @@ async function searchImg(htmlArr) {
     searchHtml(htmlNo)
   }
 }
+
 function searchHtml(htmlNo) {
 
   console.log(`${baseUrl}/tupianqu/${type}/${htmlNo == 1 ? '' : `index_${htmlNo}.html`}`)
@@ -133,6 +142,3 @@ function searchHtml(htmlNo) {
 
 }
 searchHtml(htmlNo)
-
-
-
