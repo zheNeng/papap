@@ -4,8 +4,8 @@ const fs = require("fs");
 const path = require('path');
 var baseUrl = 'https://www.3344mf.com'  //爬取的网站
 var sum = 0
-var htmlNo = 150 //爬虫得到起始页面，一个页面有20个图片库，每个图片库有20+的图片
-var htmlLimt = htmlNo + 5  //爬虫的结束页面
+var htmlNo = 1 //爬虫得到起始页面，一个页面有20个图片库，每个图片库有20+的图片
+var htmlLimt = htmlNo + 10  //爬虫的结束页面
 let type = 'yazhou'   //图片分类   //katong yazhou zipai  taotu siwa  oumei
 var time = ''
 try {
