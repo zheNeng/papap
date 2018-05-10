@@ -18,7 +18,7 @@ let newdir = path.join(__dirname, `dist`)
 let picdir = newdir + `/${type}`
 
 var config = {
-  timeout: 2000,
+  timeout: 5000,
   url: 'http://pic.58pic.com/58pic/14/62/50/62558PICxm8_1024.jpg',
   method: 'get',
   responseType: 'arraybuffer'
@@ -27,6 +27,12 @@ var f = function (e) { //封装函数
   let n = 0
   let result = []
   return new Promise((res, rej) => {
+    setTimeout(() => {
+      if(n<e.length){
+        console.log('相应时间过长，终止')
+        res([])
+      }
+    }, e.length*500);
     e.forEach((a, i) => {
       a.then((t) => {
         n++
@@ -36,13 +42,14 @@ var f = function (e) { //封装函数
         }
       }).catch(a => {
         n++
-        console.log(`第${n+1}张图片请求失败`)
+        console.log(`第${n}张图片请求失败`)
         // result[i] = a
         // if (n == e.length) {
         //   res(result)
         // }
       })
     })
+    
   })
 
 }
@@ -89,12 +96,15 @@ async function searchImg(htmlArr) {
           console.log('图片过大')
         }
       })
-      console.log('写入所有消耗时间', (new Date() - time) / 1000 + '秒')
+      console.log('写入所有消耗时间', (new Date() - time) / 1000 + '秒',`${i}/${htmlArr.length-1}`)
     } catch (e) { console.log('子页面读取失败') }
   }
+
   if (htmlNo == htmlLimt) {
+    console.log('结束')
     return
   } else {
+    console.log('下一页')
     htmlNo++
     searchHtml(htmlNo)
   }
