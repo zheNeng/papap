@@ -4,7 +4,7 @@ const fs = require("fs");
 const path = require('path');
 var baseUrl = 'https://www.3344mf.com'  //爬取的网站
 var sum = 0
-var htmlNo = 1 //爬虫得到起始页面，一个页面有20个图片库，每个图片库有20+的图片
+var htmlNo =2 //爬虫得到起始页面，一个页面有20个图片库，每个图片库有20+的图片
 var htmlLimt = htmlNo + 10  //爬虫的结束页面
 let type = 'yazhou'   //图片分类   //katong yazhou zipai  taotu siwa  oumei
 var time = ''
@@ -29,8 +29,12 @@ var f = function (e) { //封装函数
   return new Promise((res, rej) => {
     setTimeout(() => {
       if(n<e.length){
-        console.log('相应时间过长，终止')
-        res([])
+        console.log('相应时间过长，终止', e.length*500/1000)
+        if((n/e.length)>0.5){
+          res(result)
+        }else{
+          res([])
+        }
       }
     }, e.length*500);
     e.forEach((a, i) => {
